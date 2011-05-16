@@ -1,7 +1,7 @@
 CC           = gcc
 PROG         = mihrab
-CFLAGS       = `pkg-config --cflags gtk+-2.0`
-LFLAGS       = `pkg-config --libs gtk+-2.0` -litl -lgweather
+CFLAGS       = `pkg-config --cflags gtk+-3.0`
+LFLAGS       = `pkg-config --libs gtk+-3.0` -litl -lgweather-3
 DEBUG_FLAGS  = -DDEBUG -g
 GWEATHER_DEF = -DGWEATHER_I_KNOW_THIS_IS_UNSTABLE
 OBJ          = $(addprefix bin/$(CONFIG)/,mihrab.o gui.o strings.o)

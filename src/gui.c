@@ -6,9 +6,9 @@
 
 #include <gtk/gtk.h>
 
-#include <libgweather/location-entry.h>
-#include <libgweather/gweather-location.h>
-#include <libgweather/timezone-menu.h>
+#include <libgweather-3.0/libgweather/location-entry.h>
+#include <libgweather-3.0/libgweather/gweather-location.h>
+#include <libgweather-3.0/libgweather/timezone-menu.h>
 
 #include "common.h"
 #include "mihrab.h"
@@ -224,8 +224,8 @@ void update_now_layouts(day_strings *day)
     strcat(now_str_w_markup, day->now.diff);
     pango_layout_set_markup(now_layout, now_str_w_markup, -1);
 
-    if (drawarea->window)
-	gdk_window_invalidate_rect(drawarea->window, NULL, TRUE);
+    if (gtk_widget_get_window(drawarea))
+	gdk_window_invalidate_rect(gtk_widget_get_window(drawarea), NULL, TRUE);
 }
 
 static gboolean location_entry_handler(GtkWidget *widget, GdkEvent *event)
@@ -291,50 +291,51 @@ static gboolean custom_location_change_handler(GtkWidget *widget, GdkEvent *even
     }
 }
 
-static gboolean expose_event_handler(GtkWidget *widget, GdkEventExpose *event, gpointer day_data)
+gboolean draw_handler(GtkWidget *widget, cairo_t *cr, gpointer day_data)
 {
     day_strings *day = day_data;
     int width, height, x, y, old_x, avg_x, i;
-    y = widget->allocation.height / 2;
-
-    /* get a cairo_t */
-    cairo_t *cr = gdk_cairo_create (drawarea->window);
+    y = gtk_widget_get_allocated_height(widget) / 2;
     cairo_pattern_t *pattern, *mask_pattern;
 
     for (i = 0; i < 6; i++)
     {
 	old_x = x;
 
-	x = TIMELINE_MARGIN + (drawarea->allocation.width - 2 * TIMELINE_MARGIN) * day->prayers[i].position;
+	x = TIMELINE_MARGIN + (gtk_widget_get_allocated_width(drawarea) - 2 * TIMELINE_MARGIN) * day->prayers[i].position;
 
 	pango_layout_get_pixel_size(prayer_time_layouts[i], &width, &height);
-	gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
-			(i==0 || i==4? (x - width * 2/3):(i==1 || i==5? (x - width * 1/3): x - width / 2)),
-			y + prayer_time_layout_y,
-			prayer_time_layouts[i]);
+        gtk_render_layout(gtk_widget_get_style_context(drawarea),
+                          cr,
+                          (i==0 || i==4? (x - width * 2/3):(i==1 || i==5? (x - width * 1/3): x - width / 2)),
+                          y + prayer_time_layout_y,
+                          prayer_time_layouts[i]);
 
 	pango_layout_get_pixel_size(prayer_name_layouts[i], &width, &height);
-	gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
-			x - width / 2,
-			y - prayer_name_layout_y - height,
-			prayer_name_layouts[i]);
+        gtk_render_layout(gtk_widget_get_style_context(drawarea),
+                          cr,
+                          x - width / 2,
+                          y - prayer_name_layout_y - height,
+                          prayer_name_layouts[i]);
 
 	if (i > 0)
 	{
 	    avg_x = (old_x + x) / 2;
 	    pango_layout_get_pixel_size(diff_layouts[i-1], &width, &height);
-	    gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
-			    avg_x - width / 2,
-			    y - diff_layout_y - height,
-			    diff_layouts[i-1]);
+            gtk_render_layout(gtk_widget_get_style_context(drawarea),
+                              cr,
+                              avg_x - width / 2,
+                              y - diff_layout_y - height,
+                              diff_layouts[i-1]);
 	    if (i == 5)
 	    {
-		avg_x = (x + drawarea->allocation.width - TIMELINE_MARGIN) / 2;
+		avg_x = (x + gtk_widget_get_allocated_width(drawarea) - TIMELINE_MARGIN) / 2;
 		pango_layout_get_pixel_size(diff_layouts[i], &width, &height);
-		gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
-				avg_x - width / 2,
-				y - diff_layout_y - height,
-				diff_layouts[i]);
+                gtk_render_layout(gtk_widget_get_style_context(drawarea),
+                                  cr,
+                                  avg_x - width / 2,
+                                  y - diff_layout_y - height,
+                                  diff_layouts[i]);
 	    }
 	}
 
@@ -371,7 +372,7 @@ static gboolean expose_event_handler(GtkWidget *widget, GdkEventExpose *event, g
     cairo_push_group (cr);
 
     /* draw the timeline: horizontal color pattern */
-    pattern = cairo_pattern_create_linear (TIMELINE_MARGIN, y, widget->allocation.width, y);
+    pattern = cairo_pattern_create_linear (TIMELINE_MARGIN, y, gtk_widget_get_allocated_width(widget), y);
     cairo_pattern_add_color_stop_rgb (pattern, 0, 0, 0, 0);
     for (i = 0; i < 6; i++)
     {
@@ -388,7 +389,7 @@ static gboolean expose_event_handler(GtkWidget *widget, GdkEventExpose *event, g
     cairo_mask (cr, mask_pattern);
     cairo_pop_group_to_source (cr);
     /* paint the timeline */
-    cairo_rectangle (cr, TIMELINE_MARGIN, y, widget->allocation.width - 2 * TIMELINE_MARGIN, TIMELINE_DEPTH);
+    cairo_rectangle (cr, TIMELINE_MARGIN, y, gtk_widget_get_allocated_width(widget) - 2 * TIMELINE_MARGIN, TIMELINE_DEPTH);
     cairo_fill (cr);
 
     /* release the current source pattern */
@@ -402,7 +403,7 @@ static gboolean expose_event_handler(GtkWidget *widget, GdkEventExpose *event, g
 #endif
 
     /* draw the now symbol */
-    x = TIMELINE_MARGIN + (drawarea->allocation.width - 2 * TIMELINE_MARGIN) * day->now.position;
+    x = TIMELINE_MARGIN + (gtk_widget_get_allocated_width(drawarea) - 2 * TIMELINE_MARGIN) * day->now.position;
     pattern = cairo_pattern_create_radial (x-3, y-3, 1.5,
                                            x-1, y-1, 15);
     cairo_pattern_add_color_stop_rgba (pattern, 0, 1, 1, 1, 1);
@@ -414,19 +415,19 @@ static gboolean expose_event_handler(GtkWidget *widget, GdkEventExpose *event, g
     pango_layout_get_pixel_size(now_layout, &width, &height);
     if (x - width / 2 < TIMELINE_MARGIN)
 	x = TIMELINE_MARGIN + width / 2;
-    else if (x + width / 2 > drawarea->allocation.width - TIMELINE_MARGIN)
-	x = drawarea->allocation.width - TIMELINE_MARGIN - width / 2;
-    gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
-		    x - width / 2,
-		    y + 35,
-		    now_layout);
+    else if (x + width / 2 > gtk_widget_get_allocated_width(drawarea) - TIMELINE_MARGIN)
+	x = gtk_widget_get_allocated_width(drawarea) - TIMELINE_MARGIN - width / 2;
 
+    gtk_render_layout(gtk_widget_get_style_context(drawarea),
+                      cr,
+                      x - width / 2,
+                      y + 35,
+                      now_layout);
+
+    cairo_set_source_rgb (cr, 1, 1, 1);
     cairo_pattern_destroy (pattern);
-    cairo_destroy(cr);
-
 #if DEBUG
     assert (cairo_pattern_get_reference_count (pattern) == 0);
-    assert (cairo_get_reference_count (cr) == 0);
 #endif
 
     return TRUE;
@@ -443,8 +444,8 @@ static GtkWidget *create_times_page(day_strings *day)
 
     drawarea = gtk_drawing_area_new();
     gtk_widget_set_size_request(drawarea, TIMELINE_WIDTH, TIMELINE_HEIGHT);
-    g_signal_connect(G_OBJECT(drawarea), "expose_event",
-                     G_CALLBACK (expose_event_handler), day);
+    g_signal_connect(G_OBJECT(drawarea), "draw",
+                     G_CALLBACK (draw_handler), day);
 
     now_layout = gtk_widget_create_pango_layout(drawarea, NULL);
     pango_layout_set_alignment(now_layout, PANGO_ALIGN_CENTER);
