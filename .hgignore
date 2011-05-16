@@ -1,0 +1,5 @@
+syntax: glob
+mihrab
+*.o
+*.pot
+*.mo

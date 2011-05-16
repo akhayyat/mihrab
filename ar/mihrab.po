@@ -1,0 +1,257 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Mihrab v0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-05-16 06:09-0400\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Ahmad Khayyat <akhayyat@gmail.com>\n"
+"Language-Team: Ahmad Khayyat <akhayyat@gmail.com>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Arabic\n"
+"X-Poedit-Country: SAUDI ARABIA\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: src/mihrab.c:140
+#, c-format
+msgid ""
+"\n"
+"%s prayer time"
+msgstr ""
+"\n"
+"وقت صلاة %s"
+
+#: src/mihrab.c:144
+#, c-format
+msgid ""
+"\n"
+"%s\n"
+"till %s"
+msgstr ""
+"\n"
+"تبقى %s\n"
+"على %s"
+
+#: src/gui.c:489
+msgid "_Known Location"
+msgstr "م_كان معروف"
+
+#: src/gui.c:501
+msgid "_Custom Location:"
+msgstr "مكان مخص_ص"
+
+#: src/gui.c:506
+msgid "Na_me"
+msgstr "ا_سم المكان"
+
+#: src/gui.c:514
+msgid "La_titude"
+msgstr "_دائرة العرض"
+
+#: src/gui.c:525
+msgid "Lon_gitude"
+msgstr "_خط الطول"
+
+#: src/gui.c:536
+msgid "Time _Zone"
+msgstr "المنظقة ال_زمنية"
+
+#: src/gui.c:545
+msgid "Daylight Saving"
+msgstr "توقيت صيفي"
+
+#: src/gui.c:548
+msgid "_No"
+msgstr "_لا"
+
+#: src/gui.c:549
+msgid "_Yes"
+msgstr "_نعم"
+
+#: src/gui.c:558
+msgid "Location"
+msgstr "المكان"
+
+#: src/gui.c:589
+msgid "_Prayer Times"
+msgstr "أو_قات الصلاة"
+
+#: src/gui.c:591
+msgid "_Settings"
+msgstr "الإ_عدادات"
+
+#: src/gui.c:595
+msgid "Mihrab Prayer Times"
+msgstr "محراب: مواقيت الصلاة"
+
+#: src/strings.c:24
+#, c-format
+msgid "%dh %dm %ds"
+msgstr "%dس %dد %dث"
+
+#: src/strings.c:25
+#, c-format
+msgid "%dm %ds"
+msgstr "%dد %dث"
+
+#: src/strings.c:26
+#, c-format
+msgid "%ds"
+msgstr "%dث"
+
+#: src/strings.c:28
+#: src/strings.c:34
+msgid "Fajr"
+msgstr "الفجر"
+
+#: src/strings.c:29
+msgid "Shorooq"
+msgstr "الشروق"
+
+#: src/strings.c:30
+msgid "Dhuhr"
+msgstr "الظهر"
+
+#: src/strings.c:31
+msgid "Asr"
+msgstr "العصر"
+
+#: src/strings.c:32
+msgid "Maghrib"
+msgstr "المغرب"
+
+#: src/strings.c:33
+msgid "Ishaa"
+msgstr "العشاء"
+
+#: src/strings.c:36
+msgid "Muharram"
+msgstr "محرم"
+
+#: src/strings.c:37
+msgid "Safar"
+msgstr "صفر"
+
+#: src/strings.c:38
+msgid "Rabee Alawwal"
+msgstr "ربيع الأول"
+
+#: src/strings.c:39
+msgid "Rabee Althani"
+msgstr "ربيع الثاني"
+
+#: src/strings.c:40
+msgid "Jumada Alawwal"
+msgstr "جمادى الأول"
+
+#: src/strings.c:41
+msgid "Jumada Althani"
+msgstr "جمادى الثاني"
+
+#: src/strings.c:42
+msgid "Rajab"
+msgstr "رجب"
+
+#: src/strings.c:43
+msgid "Shaaban"
+msgstr "شعبان"
+
+#: src/strings.c:44
+msgid "Ramadhan"
+msgstr "رمضان"
+
+#: src/strings.c:45
+msgid "Shawwal"
+msgstr "شوال"
+
+#: src/strings.c:46
+msgid "Thul Qidah"
+msgstr "ذو القعدة"
+
+#: src/strings.c:47
+msgid "Thul Hijjah"
+msgstr "ذو الحجة"
+
+#: src/strings.c:53
+msgid "Sunday"
+msgstr "الأحد"
+
+#: src/strings.c:54
+msgid "Monday"
+msgstr "الإثنين"
+
+#: src/strings.c:55
+msgid "Tuesday"
+msgstr "الثلاثاء"
+
+#: src/strings.c:56
+msgid "Wednesday"
+msgstr "الأربعاء"
+
+#: src/strings.c:57
+msgid "Thursday"
+msgstr "الخميس"
+
+#: src/strings.c:58
+msgid "Friday"
+msgstr "الجمعة"
+
+#: src/strings.c:59
+msgid "Saturday"
+msgstr "السبت"
+
+#: src/strings.c:61
+msgid "January"
+msgstr "يناير"
+
+#: src/strings.c:62
+msgid "February"
+msgstr "فبراير"
+
+#: src/strings.c:63
+msgid "March"
+msgstr "مارس"
+
+#: src/strings.c:64
+msgid "April"
+msgstr "أبريل"
+
+#: src/strings.c:65
+msgid "May"
+msgstr "مايو"
+
+#: src/strings.c:66
+msgid "June"
+msgstr "يونية"
+
+#: src/strings.c:67
+msgid "July"
+msgstr "يولية"
+
+#: src/strings.c:68
+msgid "August"
+msgstr "أغسطس"
+
+#: src/strings.c:69
+msgid "September"
+msgstr "سبتمبر"
+
+#: src/strings.c:70
+msgid "October"
+msgstr "أكتوبر"
+
+#: src/strings.c:71
+msgid "November"
+msgstr "نوفمبر"
+
+#: src/strings.c:72
+msgid "December"
+msgstr "ديسمبر"
+
+#~ msgid "_Elevation"
+#~ msgstr "الا_رتفاع"
+
+#~ msgid "Meters"
+#~ msgstr "متراً"
