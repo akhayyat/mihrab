@@ -28,6 +28,7 @@ DEBUG_FLAGS  = -DDEBUG -g
 GWEATHER_DEF = -DGWEATHER_I_KNOW_THIS_IS_UNSTABLE
 OBJ          = $(addprefix bin/$(CONFIG)/,mihrab.o gui.o strings.o)
 BINDIR       = bin/$(CONFIG)
+LANGS        = ar
 
 ifeq ($(CONFIG), debug)
 	CFLAGS += $(DEBUG_FLAGS)
@@ -35,7 +36,7 @@ else
 	CONFIG = release
 endif
 
-all: bin/$(CONFIG)/$(PROG)
+all: bin/$(CONFIG)/$(PROG) $(addsuffix /LC_MESSAGES/$(PROG).mo,$(LANGS))
 
 bin/$(CONFIG):
 	mkdir -p bin/$(CONFIG)
@@ -60,5 +61,17 @@ clean:
 clean-$(CONFIG):
 	rm -fr bin/$(CONFIG)/
 
-pot: src/mihrab.c src/gui.c src/strings.c
+######################################################################
+# Translation Targets
+######################################################################
+
+pot: $(PROG).pot
+
+$(PROG).pot: src/mihrab.c src/gui.c src/strings.c
 	xgettext -d mihrab -o mihrab.pot --keyword=_ src/mihrab.c src/gui.c src/strings.c
+
+%/LC_MESSAGES/$(PROG).mo: %/$(PROG).po
+	mkdir -p $(@D)
+	msgfmt -o $@ $^
+
+.PHONY: pot

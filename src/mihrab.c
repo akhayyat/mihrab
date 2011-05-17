@@ -233,7 +233,7 @@ static void init_settings(void)
 int main(int argc, char *argv[])
 {
     setlocale(LC_ALL, "");
-    bindtextdomain("mihrab", "/home/ahmad/projects/mihrab");
+    bindtextdomain("mihrab", "./");
     //bindtextdomain("mihrab", "/usr/share/locale");
     textdomain("mihrab");
 
