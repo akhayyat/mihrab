@@ -599,7 +599,7 @@ void init_gui(int *argc_p, char **argv_p[], day_strings *day)
 {
     GtkWidget *notebook, *times_page_label, *settings_page_label;
 
-    bindtextdomain("mihrab", "/home/ahmad/projects/mihrab");
+    bindtextdomain("mihrab", "./");
     textdomain("mihrab");
 
     gtk_init(argc_p, argv_p);
