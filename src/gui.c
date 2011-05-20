@@ -35,19 +35,26 @@
 #define NOW_MARKUP_BEFORE "<span foreground='DodgerBlue4'><b>"
 #define NOW_MARKUP_AFTER  "</b></span>"
 #define NOW_MARKUP_LEN 100
-
-#define TIMELINE_LINE_WIDTH 4
 #define NOW_SYMB_WIDTH 10
 
-static const int MARGIN = 10;
-static const int TIMELINE_MARGIN = 0;
-static const int TIMELINE_WIDTH = 1000;
-static const int TIMELINE_HEIGHT = 200;
-static const int TIMELINE_DEPTH = 60;
+#define MARGIN 10
+#define TIMELINE_MARGIN 0
+#define TIMELINE_WIDTH 1000
+#define TIMELINE_HEIGHT 200
+#define TIMELINE_DEPTH 60
+#define TIMELINE_LINE_WIDTH 4
 #define MIHRAB_WIDTH 10
 #define MIHRAB_HEIGHT 25
 #define MIHRAB_HEIGHT2 13
 #define SUN_RADIUS 10
+
+#define PRAYER_NAME_LAYOUT_Y 50
+#define DIFF_LAYOUT_Y 100
+#define PRAYER_TIME_LAYOUT_Y 90
+#define NOW_LAYOUT_Y 35
+
+#define INITIAL_COUNTRY "SA"
+#define INITIAL_CITY    "Mecca"
 
 /* Prayer Times page widgets */
 static PangoLayout *now_layout = NULL;
@@ -78,10 +85,6 @@ static double prayer_sun_y[] = {0,                             /* Fajr */
                                 -MIHRAB_HEIGHT,                /* Asr */
                                 -SUN_RADIUS,                   /* Maghrib */
                                 0};                            /* Isha */
-
-static int prayer_name_layout_y = 50;
-static int diff_layout_y = 100;
-static int prayer_time_layout_y = 90;
 
 /* Settings page widgets */
 static GtkWidget *known_location_radio = NULL;
@@ -148,9 +151,6 @@ static void extract_location_from_location_entry(void)
 
 static void init_location(void)
 {
-    /* initial location */
-    const char *target_country = "SA", *target_city = "Mecca";
-
     GWeatherLocation *world, *parent, **children, *gw_location;
     const char *current_country, *current_city;
     const char *city, *code;
@@ -164,7 +164,7 @@ static void init_location(void)
         j++;
         children = gweather_location_get_children(parent);
         current_country = gweather_location_get_country(children[j]);
-    } while (strcmp(current_country, target_country) != 0);
+    } while (strcmp(current_country, INITIAL_COUNTRY) != 0);
     parent = children[j];
 
     j = -1;
@@ -173,21 +173,8 @@ static void init_location(void)
         j++;
         children = gweather_location_get_children(parent);
         current_city = gweather_location_get_name(gweather_location_get_children(children[j])[0]);
-    } while (strcmp(current_city, target_city) != 0);
+    } while (strcmp(current_city, INITIAL_CITY) != 0);
     parent = children[j];
-
-    /* for (i = 0; i < 2; i++) */
-    /* { */
-    /*     children = gweather_location_get_children(parent); */
-    /*     j = -1; */
-    /*     do */
-    /*     { */
-    /*         j++; */
-    /*         names[i] = gweather_location_get_name(children[j]); */
-    /*     } while (strcmp(names[i], targets[i]) != 0); */
-    /*     parent = children[j]; */
-    /* } */
-
     gw_location = gweather_location_get_children(parent)[0];
 
     city = gweather_location_get_city_name(gw_location);
@@ -232,6 +219,22 @@ void update_day_layouts(day_strings *day)
     gtk_label_set_label(GTK_LABEL(greg_label), day->greg_date);
     gtk_label_set_label(GTK_LABEL(weekday_label), day->weekday);
     gtk_label_set_label(GTK_LABEL(hijri_label), day->hijri_date);
+
+    if (drawarea->window)
+        gdk_window_invalidate_rect(drawarea->window, NULL, TRUE);
+}
+
+void *get_now_layout_rectangle(day_strings *day, GdkRectangle *rectangle)
+{
+    pango_layout_get_pixel_size(now_layout, &(rectangle->width), &(rectangle->height));
+    rectangle->x = TIMELINE_MARGIN +
+        (drawarea->allocation.width - 2 * TIMELINE_MARGIN) * day->now.position -
+        rectangle->width / 2;
+    if (rectangle->x < TIMELINE_MARGIN)
+	rectangle->x = TIMELINE_MARGIN;
+    else if (rectangle->x + rectangle->width > drawarea->allocation.width - TIMELINE_MARGIN)
+	rectangle->x = drawarea->allocation.width - TIMELINE_MARGIN - rectangle->width;
+    rectangle->y = drawarea->allocation.height / 2 + NOW_LAYOUT_Y;
 }
 
 void update_now_layouts(day_strings *day)
@@ -243,7 +246,29 @@ void update_now_layouts(day_strings *day)
     pango_layout_set_markup(now_layout, now_str_w_markup, -1);
 
     if (gtk_widget_get_window(drawarea))
-	gdk_window_invalidate_rect(gtk_widget_get_window(drawarea), NULL, TRUE);
+    {
+        static GdkRectangle old_rectangle;
+        GdkRectangle new_rectangle;
+
+        get_now_layout_rectangle(day, &new_rectangle);
+        /* Increase rectangle height to cover the now symbol */
+        new_rectangle.height += NOW_LAYOUT_Y + MIHRAB_HEIGHT;
+        new_rectangle.y -= NOW_LAYOUT_Y + MIHRAB_HEIGHT;
+
+        gdk_window_invalidate_rect(gtk_widget_get_window(drawarea), &old_rectangle, TRUE);
+	gdk_window_invalidate_rect(gtk_widget_get_window(drawarea), &new_rectangle, TRUE);
+#if DEBUG
+        cairo_t *cr = gdk_cairo_create(drawarea->window);
+        cairo_set_source_rgb(cr, 1, 0, 0);
+        cairo_rectangle(cr, old_rectangle.x, old_rectangle.y, old_rectangle.width, old_rectangle.height);
+        cairo_stroke(cr);
+        cairo_set_source_rgb(cr, 0, 0, 0);
+        cairo_rectangle(cr, new_rectangle.x, new_rectangle.y, new_rectangle.width, new_rectangle.height);
+        cairo_stroke(cr);
+        cairo_destroy(cr);
+#endif
+        old_rectangle = new_rectangle;
+    }
 }
 
 static gboolean location_entry_handler(GtkWidget *widget, GdkEvent *event)
@@ -326,14 +351,14 @@ gboolean draw_handler(GtkWidget *widget, cairo_t *cr, gpointer day_data)
         gtk_render_layout(gtk_widget_get_style_context(drawarea),
                           cr,
                           (i==0 || i==4? (x - width * 2/3):(i==1 || i==5? (x - width * 1/3): x - width / 2)),
-                          y + prayer_time_layout_y,
+                          y + PRAYER_TIME_LAYOUT_Y,
                           prayer_time_layouts[i]);
 
 	pango_layout_get_pixel_size(prayer_name_layouts[i], &width, &height);
         gtk_render_layout(gtk_widget_get_style_context(drawarea),
                           cr,
                           x - width / 2,
-                          y - prayer_name_layout_y - height,
+                          y - PRAYER_NAME_LAYOUT_Y - height,
                           prayer_name_layouts[i]);
 
 	if (i > 0)
@@ -343,7 +368,7 @@ gboolean draw_handler(GtkWidget *widget, cairo_t *cr, gpointer day_data)
             gtk_render_layout(gtk_widget_get_style_context(drawarea),
                               cr,
                               avg_x - width / 2,
-                              y - diff_layout_y - height,
+                              y - DIFF_LAYOUT_Y - height,
                               diff_layouts[i-1]);
 	    if (i == 5)
 	    {
@@ -352,7 +377,7 @@ gboolean draw_handler(GtkWidget *widget, cairo_t *cr, gpointer day_data)
                 gtk_render_layout(gtk_widget_get_style_context(drawarea),
                                   cr,
                                   avg_x - width / 2,
-                                  y - diff_layout_y - height,
+                                  y - DIFF_LAYOUT_Y - height,
                                   diff_layouts[i]);
 	    }
 	}
@@ -430,16 +455,13 @@ gboolean draw_handler(GtkWidget *widget, cairo_t *cr, gpointer day_data)
     cairo_arc (cr, x, y, 5, 0, 2 * G_PI);
     cairo_fill (cr);
 
-    pango_layout_get_pixel_size(now_layout, &width, &height);
-    if (x - width / 2 < TIMELINE_MARGIN)
-	x = TIMELINE_MARGIN + width / 2;
-    else if (x + width / 2 > gtk_widget_get_allocated_width(drawarea) - TIMELINE_MARGIN)
-	x = gtk_widget_get_allocated_width(drawarea) - TIMELINE_MARGIN - width / 2;
+    GdkRectangle rectangle;
+    get_now_layout_rectangle(day, &rectangle);
 
     gtk_render_layout(gtk_widget_get_style_context(drawarea),
                       cr,
-                      x - width / 2,
-                      y + 35,
+                      rectangle.x,
+		      rectangle.y,
                       now_layout);
 
     cairo_set_source_rgb (cr, 1, 1, 1);
@@ -575,7 +597,6 @@ static GtkWidget *create_settings_page(void)
     row++;
 
     location_frame = gtk_frame_new(_("Location"));
-    gtk_misc_set_alignment(GTK_MISC(label), 1, 0.5);
     gtk_container_set_border_width(GTK_CONTAINER(location_frame), MARGIN);
     gtk_container_add(GTK_CONTAINER(location_frame), table);
 
