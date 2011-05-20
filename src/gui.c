@@ -82,6 +82,7 @@ static double prayer_sun_y[] = {0,                             /* Fajr */
 static int prayer_name_layout_y = 50;
 static int diff_layout_y = 100;
 static int prayer_time_layout_y = 90;
+static int now_layout_y = 35;
 
 /* Settings page widgets */
 static GtkWidget *known_location_radio = NULL;
@@ -232,6 +233,22 @@ void update_day_layouts(day_strings *day)
     gtk_label_set_label(GTK_LABEL(greg_label), day->greg_date);
     gtk_label_set_label(GTK_LABEL(weekday_label), day->weekday);
     gtk_label_set_label(GTK_LABEL(hijri_label), day->hijri_date);
+
+    if (drawarea->window)
+        gdk_window_invalidate_rect(drawarea->window, NULL, TRUE);
+}
+
+void *get_now_layout_rectangle(day_strings *day, GdkRectangle *rectangle)
+{
+    pango_layout_get_pixel_size(now_layout, &(rectangle->width), &(rectangle->height));
+    rectangle->x = TIMELINE_MARGIN +
+        (drawarea->allocation.width - 2 * TIMELINE_MARGIN) * day->now.position -
+        rectangle->width / 2;
+    if (rectangle->x < TIMELINE_MARGIN)
+	rectangle->x = TIMELINE_MARGIN;
+    else if (rectangle->x + rectangle->width > drawarea->allocation.width - TIMELINE_MARGIN)
+	rectangle->x = drawarea->allocation.width - TIMELINE_MARGIN - rectangle->width;
+    rectangle->y = drawarea->allocation.height / 2 + now_layout_y;
 }
 
 void update_now_layouts(day_strings *day)
@@ -243,7 +260,29 @@ void update_now_layouts(day_strings *day)
     pango_layout_set_markup(now_layout, now_str_w_markup, -1);
 
     if (drawarea->window)
-	gdk_window_invalidate_rect(drawarea->window, NULL, TRUE);
+    {
+        static GdkRectangle old_rectangle;
+        GdkRectangle new_rectangle;
+
+        get_now_layout_rectangle(day, &new_rectangle);
+        /* Increase rectangle height to cover the now symbol */
+        new_rectangle.height += now_layout_y + MIHRAB_HEIGHT;
+        new_rectangle.y -= now_layout_y + MIHRAB_HEIGHT;
+
+        gdk_window_invalidate_rect(drawarea->window, &old_rectangle, TRUE);
+	gdk_window_invalidate_rect(drawarea->window, &new_rectangle, TRUE);
+#if DEBUG
+        cairo_t *cr = gdk_cairo_create(drawarea->window);
+        cairo_set_source_rgb(cr, 1, 0, 0);
+        cairo_rectangle(cr, old_rectangle.x, old_rectangle.y, old_rectangle.width, old_rectangle.height);
+        cairo_stroke(cr);
+        cairo_set_source_rgb(cr, 0, 0, 0);
+        cairo_rectangle(cr, new_rectangle.x, new_rectangle.y, new_rectangle.width, new_rectangle.height);
+        cairo_stroke(cr);
+        cairo_destroy(cr);
+#endif
+        old_rectangle = new_rectangle;
+    }
 }
 
 static gboolean location_entry_handler(GtkWidget *widget, GdkEvent *event)
@@ -429,14 +468,11 @@ static gboolean expose_event_handler(GtkWidget *widget, GdkEventExpose *event, g
     cairo_arc (cr, x, y, 5, 0, 2 * G_PI);
     cairo_fill (cr);
 
-    pango_layout_get_pixel_size(now_layout, &width, &height);
-    if (x - width / 2 < TIMELINE_MARGIN)
-	x = TIMELINE_MARGIN + width / 2;
-    else if (x + width / 2 > drawarea->allocation.width - TIMELINE_MARGIN)
-	x = drawarea->allocation.width - TIMELINE_MARGIN - width / 2;
+    GdkRectangle rectangle;
+    get_now_layout_rectangle(day, &rectangle);
     gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
-		    x - width / 2,
-		    y + 35,
+		    rectangle.x,
+		    rectangle.y,
 		    now_layout);
 
     cairo_pattern_destroy (pattern);
