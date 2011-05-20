@@ -35,19 +35,23 @@
 #define NOW_MARKUP_BEFORE "<span foreground='DodgerBlue4'><b>"
 #define NOW_MARKUP_AFTER  "</b></span>"
 #define NOW_MARKUP_LEN 100
-
-#define TIMELINE_LINE_WIDTH 4
 #define NOW_SYMB_WIDTH 10
 
-static const int MARGIN = 10;
-static const int TIMELINE_MARGIN = 0;
-static const int TIMELINE_WIDTH = 1000;
-static const int TIMELINE_HEIGHT = 200;
-static const int TIMELINE_DEPTH = 60;
+#define MARGIN 10
+#define TIMELINE_MARGIN 0
+#define TIMELINE_WIDTH 1000
+#define TIMELINE_HEIGHT 200
+#define TIMELINE_DEPTH 60
+#define TIMELINE_LINE_WIDTH 4
 #define MIHRAB_WIDTH 10
 #define MIHRAB_HEIGHT 25
 #define MIHRAB_HEIGHT2 13
 #define SUN_RADIUS 10
+
+#define PRAYER_NAME_LAYOUT_Y 50
+#define DIFF_LAYOUT_Y 100
+#define PRAYER_TIME_LAYOUT_Y 90
+#define NOW_LAYOUT_Y 35
 
 /* Prayer Times page widgets */
 static PangoLayout *now_layout = NULL;
@@ -78,11 +82,6 @@ static double prayer_sun_y[] = {0,                             /* Fajr */
                                 -MIHRAB_HEIGHT,                /* Asr */
                                 -SUN_RADIUS,                   /* Maghrib */
                                 0};                            /* Isha */
-
-static int prayer_name_layout_y = 50;
-static int diff_layout_y = 100;
-static int prayer_time_layout_y = 90;
-static int now_layout_y = 35;
 
 /* Settings page widgets */
 static GtkWidget *known_location_radio = NULL;
@@ -248,7 +247,7 @@ void *get_now_layout_rectangle(day_strings *day, GdkRectangle *rectangle)
 	rectangle->x = TIMELINE_MARGIN;
     else if (rectangle->x + rectangle->width > drawarea->allocation.width - TIMELINE_MARGIN)
 	rectangle->x = drawarea->allocation.width - TIMELINE_MARGIN - rectangle->width;
-    rectangle->y = drawarea->allocation.height / 2 + now_layout_y;
+    rectangle->y = drawarea->allocation.height / 2 + NOW_LAYOUT_Y;
 }
 
 void update_now_layouts(day_strings *day)
@@ -266,8 +265,8 @@ void update_now_layouts(day_strings *day)
 
         get_now_layout_rectangle(day, &new_rectangle);
         /* Increase rectangle height to cover the now symbol */
-        new_rectangle.height += now_layout_y + MIHRAB_HEIGHT;
-        new_rectangle.y -= now_layout_y + MIHRAB_HEIGHT;
+        new_rectangle.height += NOW_LAYOUT_Y + MIHRAB_HEIGHT;
+        new_rectangle.y -= NOW_LAYOUT_Y + MIHRAB_HEIGHT;
 
         gdk_window_invalidate_rect(drawarea->window, &old_rectangle, TRUE);
 	gdk_window_invalidate_rect(drawarea->window, &new_rectangle, TRUE);
@@ -367,13 +366,13 @@ static gboolean expose_event_handler(GtkWidget *widget, GdkEventExpose *event, g
 	pango_layout_get_pixel_size(prayer_time_layouts[i], &width, &height);
 	gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
 			(i==0 || i==4? (x - width * 2/3):(i==1 || i==5? (x - width * 1/3): x - width / 2)),
-			y + prayer_time_layout_y,
+			y + PRAYER_TIME_LAYOUT_Y,
 			prayer_time_layouts[i]);
 
 	pango_layout_get_pixel_size(prayer_name_layouts[i], &width, &height);
 	gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
 			x - width / 2,
-			y - prayer_name_layout_y - height,
+			y - PRAYER_NAME_LAYOUT_Y - height,
 			prayer_name_layouts[i]);
 
 	if (i > 0)
@@ -382,7 +381,7 @@ static gboolean expose_event_handler(GtkWidget *widget, GdkEventExpose *event, g
 	    pango_layout_get_pixel_size(diff_layouts[i-1], &width, &height);
 	    gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
 			    avg_x - width / 2,
-			    y - diff_layout_y - height,
+			    y - DIFF_LAYOUT_Y - height,
 			    diff_layouts[i-1]);
 	    if (i == 5)
 	    {
@@ -390,7 +389,7 @@ static gboolean expose_event_handler(GtkWidget *widget, GdkEventExpose *event, g
 		pango_layout_get_pixel_size(diff_layouts[i], &width, &height);
 		gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
 				avg_x - width / 2,
-				y - diff_layout_y - height,
+				y - DIFF_LAYOUT_Y - height,
 				diff_layouts[i]);
 	    }
 	}
