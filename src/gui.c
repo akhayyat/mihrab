@@ -220,21 +220,21 @@ void update_day_layouts(day_strings *day)
     gtk_label_set_label(GTK_LABEL(weekday_label), day->weekday);
     gtk_label_set_label(GTK_LABEL(hijri_label), day->hijri_date);
 
-    if (drawarea->window)
-        gdk_window_invalidate_rect(drawarea->window, NULL, TRUE);
+    if (gtk_widget_get_window(drawarea))
+        gdk_window_invalidate_rect(gtk_widget_get_window(drawarea), NULL, TRUE);
 }
 
 void *get_now_layout_rectangle(day_strings *day, GdkRectangle *rectangle)
 {
     pango_layout_get_pixel_size(now_layout, &(rectangle->width), &(rectangle->height));
     rectangle->x = TIMELINE_MARGIN +
-        (drawarea->allocation.width - 2 * TIMELINE_MARGIN) * day->now.position -
+        (gtk_widget_get_allocated_width(drawarea) - 2 * TIMELINE_MARGIN) * day->now.position -
         rectangle->width / 2;
     if (rectangle->x < TIMELINE_MARGIN)
         rectangle->x = TIMELINE_MARGIN;
-    else if (rectangle->x + rectangle->width > drawarea->allocation.width - TIMELINE_MARGIN)
-        rectangle->x = drawarea->allocation.width - TIMELINE_MARGIN - rectangle->width;
-    rectangle->y = drawarea->allocation.height / 2 + NOW_LAYOUT_Y;
+    else if (rectangle->x + rectangle->width > gtk_widget_get_allocated_width(drawarea) - TIMELINE_MARGIN)
+        rectangle->x = gtk_widget_get_allocated_width(drawarea) - TIMELINE_MARGIN - rectangle->width;
+    rectangle->y = gtk_widget_get_allocated_height(drawarea) / 2 + NOW_LAYOUT_Y;
 }
 
 void update_now_layouts(day_strings *day)
@@ -258,7 +258,7 @@ void update_now_layouts(day_strings *day)
         gdk_window_invalidate_rect(gtk_widget_get_window(drawarea), &old_rectangle, TRUE);
         gdk_window_invalidate_rect(gtk_widget_get_window(drawarea), &new_rectangle, TRUE);
 #if DEBUG
-        cairo_t *cr = gdk_cairo_create(drawarea->window);
+        cairo_t *cr = gdk_cairo_create(gtk_widget_get_window(drawarea));
         cairo_set_source_rgb(cr, 1, 0, 0);
         cairo_rectangle(cr, old_rectangle.x, old_rectangle.y, old_rectangle.width, old_rectangle.height);
         cairo_stroke(cr);
