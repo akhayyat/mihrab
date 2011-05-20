@@ -53,6 +53,9 @@
 #define PRAYER_TIME_LAYOUT_Y 90
 #define NOW_LAYOUT_Y 35
 
+#define INITIAL_COUNTRY "SA"
+#define INITIAL_CITY    "Mecca"
+
 /* Prayer Times page widgets */
 static PangoLayout *now_layout = NULL;
 static PangoLayout *prayer_name_layouts[6];
@@ -148,9 +151,6 @@ static void extract_location_from_location_entry(void)
 
 static void init_location(void)
 {
-    /* initial location */
-    const char *target_country = "SA", *target_city = "Mecca";
-
     GWeatherLocation *world, *parent, **children, *gw_location;
     const char *current_country, *current_city;
     const char *city, *code;
@@ -164,7 +164,7 @@ static void init_location(void)
         j++;
         children = gweather_location_get_children(parent);
         current_country = gweather_location_get_country(children[j]);
-    } while (strcmp(current_country, target_country) != 0);
+    } while (strcmp(current_country, INITIAL_COUNTRY) != 0);
     parent = children[j];
 
     j = -1;
@@ -173,21 +173,8 @@ static void init_location(void)
         j++;
         children = gweather_location_get_children(parent);
         current_city = gweather_location_get_name(gweather_location_get_children(children[j])[0]);
-    } while (strcmp(current_city, target_city) != 0);
+    } while (strcmp(current_city, INITIAL_CITY) != 0);
     parent = children[j];
-
-    /* for (i = 0; i < 2; i++) */
-    /* { */
-    /*     children = gweather_location_get_children(parent); */
-    /*     j = -1; */
-    /*     do */
-    /*     { */
-    /*         j++; */
-    /*         names[i] = gweather_location_get_name(children[j]); */
-    /*     } while (strcmp(names[i], targets[i]) != 0); */
-    /*     parent = children[j]; */
-    /* } */
-
     gw_location = gweather_location_get_children(parent)[0];
 
     city = gweather_location_get_city_name(gw_location);
