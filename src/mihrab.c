@@ -87,20 +87,20 @@ static void update_prayers(void)
 
     for (i = 0; i < 6; i++)
     {
-	t.tm_hour = state->prayers[i].hour;
-	t.tm_min = state->prayers[i].minute;
-	t.tm_sec = state->prayers[i].second;
+        t.tm_hour = state->prayers[i].hour;
+        t.tm_min = state->prayers[i].minute;
+        t.tm_sec = state->prayers[i].second;
 
-	/* prayer_time_str */
+        /* prayer_time_str */
         strftime(day->prayers[i].time, TIME_STR_LEN, time_format(state->is24), &t);
 
-	/* prayer_diff_str */
-	prayer_diff = hms_to_sec(state->prayers[i+1].hour, state->prayers[i+1].minute, state->prayers[i+1].second) -
-	    hms_to_sec(state->prayers[i].hour, state->prayers[i].minute, state->prayers[i].second);
-	sec_to_hms(prayer_diff, day->prayers[i].diff, TIME_STR_LEN);
+        /* prayer_diff_str */
+        prayer_diff = hms_to_sec(state->prayers[i+1].hour, state->prayers[i+1].minute, state->prayers[i+1].second) -
+            hms_to_sec(state->prayers[i].hour, state->prayers[i].minute, state->prayers[i].second);
+        sec_to_hms(prayer_diff, day->prayers[i].diff, TIME_STR_LEN);
 
-	/* prayer positions */
-	day->prayers[i].position = (state->prayers[i].hour * 60.0 + state->prayers[i].minute) / (23 * 60.0 + 59);
+        /* prayer positions */
+        day->prayers[i].position = (state->prayers[i].hour * 60.0 + state->prayers[i].minute) / (23 * 60.0 + 59);
     }
 
     update_prayers_layouts(day);
@@ -141,31 +141,31 @@ static gboolean update_now(gpointer data)
     day->now.position = (state->now_tm.tm_hour * 3600.0 +
                          state->now_tm.tm_min * 60.0 +
                          state->now_tm.tm_sec)
-	/ (23 * 3600.0 + 59 * 60.0 + 59);
+        / (23 * 3600.0 + 59 * 60.0 + 59);
 
     /* now.diff: remaining time till next prayer */
     remain_sec = hms_to_sec(state->prayers[state->next_prayer].hour, state->prayers[state->next_prayer].minute,
-			    state->prayers[state->next_prayer].second) -
-	hms_to_sec(state->now_tm.tm_hour, state->now_tm.tm_min, state->now_tm.tm_sec);
+                            state->prayers[state->next_prayer].second) -
+        hms_to_sec(state->now_tm.tm_hour, state->now_tm.tm_min, state->now_tm.tm_sec);
     while (remain_sec < 0)
     {
-	state->next_prayer++;
-	remain_sec = hms_to_sec(state->prayers[state->next_prayer].hour, state->prayers[state->next_prayer].minute,
-				state->prayers[state->next_prayer].second) -
-	    hms_to_sec(state->now_tm.tm_hour, state->now_tm.tm_min, state->now_tm.tm_sec);
+        state->next_prayer++;
+        remain_sec = hms_to_sec(state->prayers[state->next_prayer].hour, state->prayers[state->next_prayer].minute,
+                                state->prayers[state->next_prayer].second) -
+            hms_to_sec(state->now_tm.tm_hour, state->now_tm.tm_min, state->now_tm.tm_sec);
     }
     if (remain_sec == 0)
-	snprintf(day->now.diff, TIME_STR_LEN, _("\n%s prayer time"), prayer_names(state->next_prayer));
+        snprintf(day->now.diff, TIME_STR_LEN, _("\n%s prayer time"), prayer_names(state->next_prayer));
     else
     {
-	sec_to_hms(remain_sec, tmp_str, TIME_STR_LEN);
-	snprintf(day->now.diff, TIME_STR_LEN, _("\n%s\ntill %s"), tmp_str, prayer_names(state->next_prayer));
+        sec_to_hms(remain_sec, tmp_str, TIME_STR_LEN);
+        snprintf(day->now.diff, TIME_STR_LEN, _("\n%s\ntill %s"), tmp_str, prayer_names(state->next_prayer));
     }
 
     update_now_layouts(day);
 
     if (state->now_tm.tm_mday != state->today.day)
-	update_day();
+        update_day();
 
     return TRUE;
 }
@@ -181,7 +181,7 @@ int update_timezone(const char *timezone_id)
     tzset();
     update_now(NULL);
     if (daylight == 1)
-	return state->now_tm.tm_isdst;
+        return state->now_tm.tm_isdst;
     return -1;
 }
 

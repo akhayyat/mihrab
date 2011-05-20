@@ -209,8 +209,8 @@ void update_prayers_layouts(day_strings *day)
 
     for (i = 0; i < 6; i++)
     {
-	pango_layout_set_text(prayer_time_layouts[i], day->prayers[i].time, -1);
-	pango_layout_set_text(diff_layouts[i], day->prayers[i].diff, -1);
+        pango_layout_set_text(prayer_time_layouts[i], day->prayers[i].time, -1);
+        pango_layout_set_text(diff_layouts[i], day->prayers[i].diff, -1);
     }
 }
 
@@ -231,9 +231,9 @@ void *get_now_layout_rectangle(day_strings *day, GdkRectangle *rectangle)
         (drawarea->allocation.width - 2 * TIMELINE_MARGIN) * day->now.position -
         rectangle->width / 2;
     if (rectangle->x < TIMELINE_MARGIN)
-	rectangle->x = TIMELINE_MARGIN;
+        rectangle->x = TIMELINE_MARGIN;
     else if (rectangle->x + rectangle->width > drawarea->allocation.width - TIMELINE_MARGIN)
-	rectangle->x = drawarea->allocation.width - TIMELINE_MARGIN - rectangle->width;
+        rectangle->x = drawarea->allocation.width - TIMELINE_MARGIN - rectangle->width;
     rectangle->y = drawarea->allocation.height / 2 + NOW_LAYOUT_Y;
 }
 
@@ -256,7 +256,7 @@ void update_now_layouts(day_strings *day)
         new_rectangle.y -= NOW_LAYOUT_Y + MIHRAB_HEIGHT;
 
         gdk_window_invalidate_rect(drawarea->window, &old_rectangle, TRUE);
-	gdk_window_invalidate_rect(drawarea->window, &new_rectangle, TRUE);
+        gdk_window_invalidate_rect(drawarea->window, &new_rectangle, TRUE);
 #if DEBUG
         cairo_t *cr = gdk_cairo_create(drawarea->window);
         cairo_set_source_rgb(cr, 1, 0, 0);
@@ -346,40 +346,40 @@ static gboolean expose_event_handler(GtkWidget *widget, GdkEventExpose *event, g
 
     for (i = 0; i < 6; i++)
     {
-	old_x = x;
+        old_x = x;
 
-	x = TIMELINE_MARGIN + (drawarea->allocation.width - 2 * TIMELINE_MARGIN) * day->prayers[i].position;
+        x = TIMELINE_MARGIN + (drawarea->allocation.width - 2 * TIMELINE_MARGIN) * day->prayers[i].position;
 
-	pango_layout_get_pixel_size(prayer_time_layouts[i], &width, &height);
-	gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
-			(i==0 || i==4? (x - width * 2/3):(i==1 || i==5? (x - width * 1/3): x - width / 2)),
-			y + PRAYER_TIME_LAYOUT_Y,
-			prayer_time_layouts[i]);
+        pango_layout_get_pixel_size(prayer_time_layouts[i], &width, &height);
+        gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
+                        (i==0 || i==4? (x - width * 2/3):(i==1 || i==5? (x - width * 1/3): x - width / 2)),
+                        y + PRAYER_TIME_LAYOUT_Y,
+                        prayer_time_layouts[i]);
 
-	pango_layout_get_pixel_size(prayer_name_layouts[i], &width, &height);
-	gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
-			x - width / 2,
-			y - PRAYER_NAME_LAYOUT_Y - height,
-			prayer_name_layouts[i]);
+        pango_layout_get_pixel_size(prayer_name_layouts[i], &width, &height);
+        gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
+                        x - width / 2,
+                        y - PRAYER_NAME_LAYOUT_Y - height,
+                        prayer_name_layouts[i]);
 
-	if (i > 0)
-	{
-	    avg_x = (old_x + x) / 2;
-	    pango_layout_get_pixel_size(diff_layouts[i-1], &width, &height);
-	    gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
-			    avg_x - width / 2,
-			    y - DIFF_LAYOUT_Y - height,
-			    diff_layouts[i-1]);
-	    if (i == 5)
-	    {
-		avg_x = (x + drawarea->allocation.width - TIMELINE_MARGIN) / 2;
-		pango_layout_get_pixel_size(diff_layouts[i], &width, &height);
-		gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
-				avg_x - width / 2,
-				y - DIFF_LAYOUT_Y - height,
-				diff_layouts[i]);
-	    }
-	}
+        if (i > 0)
+        {
+            avg_x = (old_x + x) / 2;
+            pango_layout_get_pixel_size(diff_layouts[i-1], &width, &height);
+            gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
+                            avg_x - width / 2,
+                            y - DIFF_LAYOUT_Y - height,
+                            diff_layouts[i-1]);
+            if (i == 5)
+            {
+                avg_x = (x + drawarea->allocation.width - TIMELINE_MARGIN) / 2;
+                pango_layout_get_pixel_size(diff_layouts[i], &width, &height);
+                gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
+                                avg_x - width / 2,
+                                y - DIFF_LAYOUT_Y - height,
+                                diff_layouts[i]);
+            }
+        }
 
         /* draw prayer symbol: sun */
         pattern = cairo_pattern_create_radial (x + prayer_sun_x[i], y + prayer_sun_y[i] - SUN_RADIUS, 1,
@@ -457,9 +457,9 @@ static gboolean expose_event_handler(GtkWidget *widget, GdkEventExpose *event, g
     GdkRectangle rectangle;
     get_now_layout_rectangle(day, &rectangle);
     gdk_draw_layout(drawarea->window, drawarea->style->black_gc,
-		    rectangle.x,
-		    rectangle.y,
-		    now_layout);
+                    rectangle.x,
+                    rectangle.y,
+                    now_layout);
 
     cairo_pattern_destroy (pattern);
     cairo_destroy(cr);
@@ -491,9 +491,9 @@ static GtkWidget *create_times_page(day_strings *day)
     int i;
     for (i = 0; i < 6; i++)
     {
-	prayer_name_layouts[i] = gtk_widget_create_pango_layout(drawarea, prayer_names(i));
-	prayer_time_layouts[i] = gtk_widget_create_pango_layout(drawarea, "");
-	diff_layouts[i] = gtk_widget_create_pango_layout(drawarea, "");
+        prayer_name_layouts[i] = gtk_widget_create_pango_layout(drawarea, prayer_names(i));
+        prayer_time_layouts[i] = gtk_widget_create_pango_layout(drawarea, "");
+        diff_layouts[i] = gtk_widget_create_pango_layout(drawarea, "");
     }
 
     hbox = gtk_hbox_new(FALSE, 0);
