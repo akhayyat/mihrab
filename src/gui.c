@@ -596,7 +596,6 @@ static GtkWidget *create_settings_page(void)
     row++;
 
     location_frame = gtk_frame_new(_("Location"));
-    gtk_misc_set_alignment(GTK_MISC(label), 1, 0.5);
     gtk_container_set_border_width(GTK_CONTAINER(location_frame), MARGIN);
     gtk_container_add(GTK_CONTAINER(location_frame), table);
 
