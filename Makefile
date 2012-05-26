@@ -50,7 +50,7 @@ bin/$(CONFIG)/mihrab.o: src/mihrab.c src/gui.h src/strings.h
 	$(CC) -c src/mihrab.c $(CFLAGS) -o $@
 
 bin/$(CONFIG)/gui.o: src/gui.c src/mihrab.h src/strings.h
-	$(CC) -c src/gui.c $(CFLAGS) $(GWEATHER_DEF) -o $@
+	$(CC) -I /usr/include/libgweather-3.0 -c src/gui.c $(CFLAGS) $(GWEATHER_DEF) -o $@
 
 bin/$(CONFIG)/strings.o: src/strings.c
 	$(CC) -c src/strings.c $(CFLAGS) -o $@
