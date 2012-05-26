@@ -475,7 +475,7 @@ gboolean draw_handler(GtkWidget *widget, cairo_t *cr, gpointer day_data)
 
 static GtkWidget *create_times_page(day_strings *day)
 {
-    GtkWidget *vbox, *hbox;
+    GtkWidget *grid;
     char now_markup_str[NOW_MARKUP_LEN];
 
     greg_label = gtk_label_new("");
@@ -497,22 +497,25 @@ static GtkWidget *create_times_page(day_strings *day)
         diff_layouts[i] = gtk_widget_create_pango_layout(drawarea, "");
     }
 
-    hbox = gtk_hbox_new(FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(hbox), greg_label, FALSE, FALSE, MARGIN);
-    gtk_box_pack_start(GTK_BOX(hbox), weekday_label, TRUE, FALSE, 0);
-    gtk_box_pack_end(GTK_BOX(hbox), hijri_label, FALSE, FALSE, MARGIN);
-    vbox = gtk_vbox_new(FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(vbox), drawarea, TRUE, TRUE, 0);
+    grid = gtk_grid_new();
+    g_object_set(greg_label, "margin-left", MARGIN, NULL);
+    gtk_widget_set_hexpand(weekday_label, TRUE);
+    g_object_set(hijri_label, "margin-right", MARGIN, NULL);
+    gtk_grid_attach(GTK_GRID(grid), greg_label, 0, 0, 1, 1);
+    gtk_grid_attach_next_to(GTK_GRID(grid), weekday_label, greg_label, GTK_POS_RIGHT, 1, 1);
+    gtk_grid_attach_next_to(GTK_GRID(grid), hijri_label, weekday_label, GTK_POS_RIGHT, 1, 1);
+
+    gtk_widget_set_hexpand(drawarea, TRUE);
+    gtk_widget_set_vexpand(drawarea, TRUE);
+    gtk_grid_attach(GTK_GRID(grid), drawarea, 0, 1, 3, 1);
 
     gtk_widget_show(greg_label);
     gtk_widget_show(weekday_label);
     gtk_widget_show(hijri_label);
     gtk_widget_show(drawarea);
-    gtk_widget_show(hbox);
-    gtk_widget_show(vbox);
+    gtk_widget_show(grid);
 
-    return vbox;
+    return grid;
 }
 
 static GtkWidget *create_settings_page(void)
