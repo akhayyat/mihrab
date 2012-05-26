@@ -520,103 +520,96 @@ static GtkWidget *create_times_page(day_strings *day)
 
 static GtkWidget *create_settings_page(void)
 {
-    GtkWidget *vbox, *hbox, *table, *location_frame, *label;
+    GtkWidget *grid, *location_frame, *label;
     GtkAdjustment *adjust;
     GWeatherLocation *world = gweather_location_new_world(FALSE);
     int row = 0;
 
-    table = gtk_table_new(8, 2, FALSE);
-    gtk_container_set_border_width(GTK_CONTAINER(table), MARGIN);
-    gtk_table_set_row_spacings(GTK_TABLE(table), MARGIN);
-    gtk_table_set_col_spacings(GTK_TABLE(table), MARGIN);
+    grid = gtk_grid_new();
+    g_object_set(grid, "margin", MARGIN, NULL);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), MARGIN);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), MARGIN);
 
     known_location_radio = gtk_radio_button_new_with_mnemonic(NULL, _("_Known Location"));
     g_signal_connect(G_OBJECT(known_location_radio), "toggled", G_CALLBACK(location_type_handler), NULL);
-    gtk_table_attach_defaults(GTK_TABLE(table), known_location_radio, 0, 1, row, row+1);
     location_entry = gweather_location_entry_new(world);
     g_signal_connect(G_OBJECT(location_entry), "changed", G_CALLBACK(location_entry_handler), NULL);
-    gtk_table_attach_defaults(GTK_TABLE(table), location_entry, 1, 2, row, row+1);
+    gtk_grid_attach(GTK_GRID(grid), known_location_radio, 0, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), location_entry, 1, row, 2, 1);
     row++;
 
     label = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
-    gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 2, row, row+1);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, row, 3, 1);
     row++;
 
     custom_location_radio = gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(known_location_radio), _("_Custom Location:"));
     g_signal_connect(G_OBJECT(custom_location_radio), "toggled", G_CALLBACK(location_type_handler), NULL);
-    gtk_table_attach_defaults(GTK_TABLE(table), custom_location_radio, 0, 2, row, row+1);
+    gtk_grid_attach(GTK_GRID(grid), custom_location_radio, 0, row, 3, 1);
     row++;
 
     label = gtk_label_new_with_mnemonic(_("Na_me"));
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0.5);
-    gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, row, row+1);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, row, 1, 1);
     name_entry = gtk_entry_new();
-    gtk_table_attach_defaults(GTK_TABLE(table), name_entry, 1, 2, row, row+1);
+    gtk_grid_attach(GTK_GRID(grid), name_entry, 1, row, 2, 1);
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), name_entry);
     row++;
 
     label = gtk_label_new_with_mnemonic(_("La_titude"));
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0.5);
-    gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, row, row+1);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, row, 1, 1);
     adjust = (GtkAdjustment *) gtk_adjustment_new(0, -90.0, 90.0, 0.01, 1.0, 0.0);
     latitude_spin = gtk_spin_button_new(adjust, 0.1, 3);
     gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(latitude_spin), TRUE);
     g_signal_connect(G_OBJECT(latitude_spin), "value-changed", G_CALLBACK(custom_location_change_handler), NULL);
-    gtk_table_attach_defaults(GTK_TABLE(table), latitude_spin, 1, 2, row, row+1);
+    gtk_grid_attach(GTK_GRID(grid), latitude_spin, 1, row, 2, 1);
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), latitude_spin);
     row++;
 
     label = gtk_label_new_with_mnemonic(_("Lon_gitude"));
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0.5);
-    gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, row, row+1);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, row, 1, 1);
     adjust = (GtkAdjustment *) gtk_adjustment_new(0, -180.0, 180.0, 0.01, 1.0, 0.0);
     longitude_spin = gtk_spin_button_new(adjust, 0.1, 3);
     gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(longitude_spin), TRUE);
     g_signal_connect(G_OBJECT(longitude_spin), "value-changed", G_CALLBACK(custom_location_change_handler), NULL);
-    gtk_table_attach_defaults(GTK_TABLE(table), longitude_spin, 1, 2, row, row+1);
+    gtk_grid_attach(GTK_GRID(grid), longitude_spin, 1, row, 2, 1);
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), longitude_spin);
     row++;
 
     label = gtk_label_new_with_mnemonic(_("Time _Zone"));
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0.5);
-    gtk_table_attach_defaults(GTK_TABLE(table), label, 0, 1, row, row+1);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, row, 1, 1);
     timezone_menu = gweather_timezone_menu_new(world);
     g_signal_connect(G_OBJECT(timezone_menu), "notify::tzid", G_CALLBACK(custom_location_change_handler), NULL);
-    gtk_table_attach_defaults(GTK_TABLE(table), timezone_menu, 1, 2, row, row+1);
+    gtk_grid_attach(GTK_GRID(grid), timezone_menu, 1, row, 2, 1);
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), timezone_menu);
     row++;
 
     dst_label = gtk_label_new_with_mnemonic(_("Daylight Saving"));
     gtk_misc_set_alignment(GTK_MISC(dst_label), 1, 0.5);
-    gtk_table_attach_defaults(GTK_TABLE(table), dst_label, 0, 1, row, row+1);
+    gtk_grid_attach(GTK_GRID(grid), dst_label, 0, row, 1, 1);
     no_dst_radio = gtk_radio_button_new_with_mnemonic(NULL, _("_No"));
     yes_dst_radio = gtk_radio_button_new_with_mnemonic_from_widget(GTK_RADIO_BUTTON(no_dst_radio), _("_Yes"));
     g_signal_connect(G_OBJECT(no_dst_radio), "toggled", G_CALLBACK(custom_location_change_handler), NULL);
     g_signal_connect(G_OBJECT(yes_dst_radio), "toggled", G_CALLBACK(custom_location_change_handler), NULL);
-    hbox = gtk_hbox_new(FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(hbox), no_dst_radio, TRUE, FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(hbox), yes_dst_radio, TRUE, FALSE, 0);
-    gtk_table_attach_defaults(GTK_TABLE(table), hbox, 1, 2, row, row+1);
+    gtk_grid_attach(GTK_GRID(grid), no_dst_radio, 1, row, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), yes_dst_radio, 2, row, 1, 1);
     row++;
 
     location_frame = gtk_frame_new(_("Location"));
     gtk_container_set_border_width(GTK_CONTAINER(location_frame), MARGIN);
-    gtk_container_add(GTK_CONTAINER(location_frame), table);
+    gtk_container_add(GTK_CONTAINER(location_frame), grid);
 
 /* http://www.earthtools.org/ */
 /* http://world.maporama.com/ */
 /* http://www.getty.edu/research/conducting_research/vocabularies/tgn/ */
 
-    hbox = gtk_hbox_new(FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(hbox), location_frame, FALSE, FALSE, 0);
-    vbox = gtk_vbox_new(FALSE, 0);
-    gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 0);
-
-    gtk_widget_show_all(vbox);
+    gtk_widget_show_all(location_frame);
 
     gweather_location_unref(world);
 
-    return vbox;
+    return location_frame;
 }
 
 void init_gui(int *argc_p, char **argv_p[], day_strings *day)
