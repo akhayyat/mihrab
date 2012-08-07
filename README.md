@@ -82,6 +82,6 @@ translated strings based on the pot template.
 Screenshots
 -----------
 
-![English Screenshot](mihrab-prayer.times.png "Prayers in a day")
+![English Screenshot](https://bitbucket.org/akhayyat/mihrab/raw/default/mihrab-prayer.times.png "Prayers in a day")
 
-![Arabic Screenshot](mihrab-prayer.times-ar.png "Prayers in a day - Arabic")
+![Arabic Screenshot](https://bitbucket.org/akhayyat/mihrab/raw/default/mihrab-prayer.times-ar.png "Prayers in a day - Arabic")
