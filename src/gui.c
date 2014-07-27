@@ -53,7 +53,8 @@
 #define PRAYER_TIME_LAYOUT_Y 90
 #define NOW_LAYOUT_Y 35
 
-#define INITIAL_COUNTRY "SA"
+#define INITIAL_REGION  "Middle East"
+#define INITIAL_COUNTRY "Saudi Arabia"
 #define INITIAL_CITY    "Mecca"
 
 /* Prayer Times page widgets */
@@ -149,33 +150,43 @@ static void extract_location_from_location_entry(void)
     update_location_using_timezone_offset(latitude, longitude, timezone_offset);
 }
 
+static GWeatherLocation *find_gweather_location(GWeatherLocation *parent, const char *name)
+{
+    if (parent == NULL)
+        return NULL;
+
+    GWeatherLocation **locations;
+    const char *some_name;
+    int i = -1;
+
+    locations = gweather_location_get_children(parent);
+    do
+    {
+        i++;
+        if (locations[i] == NULL)  // no more locations
+            return NULL;
+
+        some_name = gweather_location_get_name(locations[i]);
+    } while (strcmp(some_name, name) != 0); // `name` not found yet
+    return locations[i];
+}
+
 static void init_location(void)
 {
-    GWeatherLocation *world, *parent, **children, *gw_location;
-    const char *current_country, *current_city;
+    GWeatherLocation *gw_world, *gw_region, *gw_country, *gw_city, *gw_location;
     const char *city, *code;
     int i, j;
 
-    world = gweather_location_new_world(FALSE);
-    parent = world;
-    j = -1;
-    do
-    {
-        j++;
-        children = gweather_location_get_children(parent);
-        current_country = gweather_location_get_country(children[j]);
-    } while (strcmp(current_country, INITIAL_COUNTRY) != 0);
-    parent = children[j];
+    gw_world = gweather_location_get_world();
+    gw_region = find_gweather_location(gw_world, INITIAL_REGION);
+    gw_country = find_gweather_location(gw_region, INITIAL_COUNTRY);
+    gw_city = find_gweather_location(gw_country, INITIAL_CITY);
 
-    j = -1;
-    do
-    {
-        j++;
-        children = gweather_location_get_children(parent);
-        current_city = gweather_location_get_name(gweather_location_get_children(children[j])[0]);
-    } while (strcmp(current_city, INITIAL_CITY) != 0);
-    parent = children[j];
-    gw_location = gweather_location_get_children(parent)[0];
+    if (gw_city == NULL)
+        g_error("Initial location not found\n"); // currently irrecoverable
+    // TODO: gracefully handle invalid initial location
+
+    gw_location = gweather_location_get_children(gw_city)[0];
 
     city = gweather_location_get_city_name(gw_location);
     code = gweather_location_get_code(gw_location);
@@ -193,10 +204,10 @@ static void init_location(void)
     g_printf("  City/code : %s / %s\n", city, code);
 #endif
 
-    /* For some weird reason, set_location doesn't work but set_city works */
-    /* gweather_location_entry_set_location(GWEATHER_LOCATION_ENTRY(location_entry), gw_location); */
-    gweather_location_entry_set_city(GWEATHER_LOCATION_ENTRY(location_entry), city, code);
-    gweather_location_unref(world);
+    /* For some weird reason, set_city doesn't work now but
+     * set_location works - used to be the other way around! */
+    gweather_location_entry_set_location(GWEATHER_LOCATION_ENTRY(location_entry), gw_location);
+    /* gweather_location_entry_set_city(GWEATHER_LOCATION_ENTRY(location_entry), city, code); */
 
     /* force a toggled event on the known_location_radio to disable custom location widgets */
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(custom_location_radio), TRUE);
@@ -522,7 +533,7 @@ static GtkWidget *create_settings_page(void)
 {
     GtkWidget *grid, *location_frame, *label;
     GtkAdjustment *adjust;
-    GWeatherLocation *world = gweather_location_new_world(FALSE);
+    GWeatherLocation *gw_world = gweather_location_get_world();
     int row = 0;
 
     grid = gtk_grid_new();
@@ -532,7 +543,7 @@ static GtkWidget *create_settings_page(void)
 
     known_location_radio = gtk_radio_button_new_with_mnemonic(NULL, _("_Known Location"));
     g_signal_connect(G_OBJECT(known_location_radio), "toggled", G_CALLBACK(location_type_handler), NULL);
-    location_entry = gweather_location_entry_new(world);
+    location_entry = gweather_location_entry_new(gw_world);
     g_signal_connect(G_OBJECT(location_entry), "changed", G_CALLBACK(location_entry_handler), NULL);
     gtk_grid_attach(GTK_GRID(grid), known_location_radio, 0, row, 1, 1);
     gtk_grid_attach(GTK_GRID(grid), location_entry, 1, row, 2, 1);
@@ -580,7 +591,7 @@ static GtkWidget *create_settings_page(void)
     label = gtk_label_new_with_mnemonic(_("Time _Zone"));
     gtk_misc_set_alignment(GTK_MISC(label), 1, 0.5);
     gtk_grid_attach(GTK_GRID(grid), label, 0, row, 1, 1);
-    timezone_menu = gweather_timezone_menu_new(world);
+    timezone_menu = gweather_timezone_menu_new(gw_world);
     g_signal_connect(G_OBJECT(timezone_menu), "notify::tzid", G_CALLBACK(custom_location_change_handler), NULL);
     gtk_grid_attach(GTK_GRID(grid), timezone_menu, 1, row, 2, 1);
     gtk_label_set_mnemonic_widget(GTK_LABEL(label), timezone_menu);
@@ -606,8 +617,6 @@ static GtkWidget *create_settings_page(void)
 /* http://www.getty.edu/research/conducting_research/vocabularies/tgn/ */
 
     gtk_widget_show_all(location_frame);
-
-    gweather_location_unref(world);
 
     return location_frame;
 }
