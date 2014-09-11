@@ -226,7 +226,7 @@ void update_location_using_timezone_id(double latitude, double longitude, const 
 
 static void init_settings(void)
 {
-    getMethod(4, &(state->method));
+    getMethod(6, &(state->method));
     state->method.round = 0;
 }
 

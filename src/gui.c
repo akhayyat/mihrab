@@ -57,6 +57,8 @@
 #define INITIAL_COUNTRY "Saudi Arabia"
 #define INITIAL_CITY    "Mecca"
 
+#define METHODS 11
+
 /* Prayer Times page widgets */
 static PangoLayout *now_layout = NULL;
 static PangoLayout *prayer_name_layouts[6];
@@ -86,6 +88,31 @@ static double prayer_sun_y[] = {0,                             /* Fajr */
                                 -MIHRAB_HEIGHT,                /* Asr */
                                 -SUN_RADIUS,                   /* Maghrib */
                                 0};                            /* Isha */
+static char *method_names[] = {
+    "none",
+    "Egyptian General Authority of Survey",
+    "University of Islamic Sciences, Karachi (Shaf'i)",
+    "University of Islamic Sciences, Karachi (Hanafi)",
+    "Islamic Society of North America",
+    "Muslim World League (MWL)",
+    "Umm Al-Qurra, Saudi Arabia",
+    "Fixed Ishaa Interval (always 90)",
+    "Egyptian General Authority of Survey (Egypt)",
+    "Umm Al-Qurra Ramadan, Saudi Arabia",
+    "Moonsighting Committee Worldwide"};
+static gboolean method_display[] = {
+    FALSE,   /* none */
+    TRUE,    /* Egyptian General Authority of Survey */
+    TRUE,    /* University of Islamic Sciences, Karachi (Shaf'i) */
+    TRUE,    /* University of Islamic Sciences, Karachi (Hanafi) */
+    TRUE,    /* Islamic Society of North America */
+    TRUE,    /* Muslim World League (MWL) */
+    TRUE,    /* Umm Al-Qurra, Saudi Arabia */
+    FALSE,   /* Fixed Ishaa Interval (always 90) */
+    TRUE,    /* Egyptian General Authority of Survey (Egypt) */
+    FALSE,   /* Umm Al-Qurra Ramadan, Saudi Arabia */
+    TRUE     /* Moonsighting Committee Worldwide */
+};
 
 /* Settings page widgets */
 static GtkWidget *known_location_radio = NULL;
@@ -98,6 +125,7 @@ static GtkWidget *timezone_menu = NULL;
 static GtkWidget *dst_label = NULL;
 static GtkWidget *no_dst_radio = NULL;
 static GtkWidget *yes_dst_radio = NULL;
+static GtkWidget *method_buttons[METHODS];
 
 static void extract_location_from_location_entry(void)
 {
@@ -529,7 +557,7 @@ static GtkWidget *create_times_page(day_strings *day)
     return grid;
 }
 
-static GtkWidget *create_settings_page(void)
+static GtkWidget *create_location_frame(void)
 {
     GtkWidget *grid, *location_frame, *label;
     GtkAdjustment *adjust;
@@ -609,7 +637,6 @@ static GtkWidget *create_settings_page(void)
     row++;
 
     location_frame = gtk_frame_new(_("Location"));
-    gtk_container_set_border_width(GTK_CONTAINER(location_frame), MARGIN);
     gtk_container_add(GTK_CONTAINER(location_frame), grid);
 
 /* http://www.earthtools.org/ */
@@ -619,6 +646,61 @@ static GtkWidget *create_settings_page(void)
     gtk_widget_show_all(location_frame);
 
     return location_frame;
+}
+
+static GtkWidget *create_method_frame(void)
+{
+    GtkWidget *grid, *method_frame;
+
+    grid = gtk_grid_new();
+    g_object_set(grid, "margin", MARGIN, NULL);
+
+    gboolean first_method = -1;
+    int i, row;
+    for (i = 0, row = 0; i < METHODS; i++)
+    {
+        if (method_display[i])
+        {
+            if (first_method == -1)
+            {
+                method_buttons[i] = gtk_radio_button_new_with_mnemonic(NULL,
+                    _(method_names[i]));
+                first_method = i;
+            }
+            else
+            {
+                method_buttons[i] = gtk_radio_button_new_with_mnemonic_from_widget(
+                    GTK_RADIO_BUTTON(method_buttons[first_method]),
+                    _(method_names[i]));
+            }
+            gtk_grid_attach(GTK_GRID(grid), method_buttons[i], 1, row++, 1, 1);
+        }
+    }
+
+    method_frame = gtk_frame_new(_("Calculation Method"));
+    gtk_container_add(GTK_CONTAINER(method_frame), grid);
+
+    gtk_widget_show_all(method_frame);
+
+    return method_frame;
+}
+
+static GtkWidget *create_settings_page(void)
+{
+    GtkWidget *grid;
+
+    grid = gtk_grid_new();
+
+    gtk_container_set_border_width(GTK_CONTAINER(grid), MARGIN);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), MARGIN);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), MARGIN);
+
+    gtk_grid_attach(GTK_GRID(grid), create_location_frame(), 0, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), create_method_frame(), 1, 0, 1, 1);
+
+    gtk_widget_show(grid);
+
+    return grid;
 }
 
 void init_gui(int *argc_p, char **argv_p[], day_strings *day)
