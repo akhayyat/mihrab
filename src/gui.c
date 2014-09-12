@@ -109,7 +109,7 @@ static gboolean method_display[] = {
     TRUE,    /* Muslim World League (MWL) */
     TRUE,    /* Umm Al-Qurra, Saudi Arabia */
     FALSE,   /* Fixed Ishaa Interval (always 90) */
-    TRUE,    /* Egyptian General Authority of Survey (Egypt) */
+    FALSE,   /* Egyptian General Authority of Survey (Egypt) */
     FALSE,   /* Umm Al-Qurra Ramadan, Saudi Arabia */
     TRUE     /* Moonsighting Committee Worldwide */
 };
