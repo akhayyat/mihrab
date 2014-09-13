@@ -224,10 +224,12 @@ void update_location_using_timezone_id(double latitude, double longitude, const 
     update_location_using_timezone_offset(latitude, longitude, offset);
 }
 
-static void init_settings(void)
+void update_method(int method)
 {
-    getMethod(6, &(state->method));
+    getMethod(method, &(state->method));
     state->method.round = 0;
+
+    update_prayers();
 }
 
 int main(int argc, char *argv[])
@@ -244,7 +246,6 @@ int main(int argc, char *argv[])
     init_state();
 
     init_strings();
-    init_settings();
     g_timeout_add(100, update_now, NULL);
     init_gui(&argc, &argv, day);
 

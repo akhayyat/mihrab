@@ -27,5 +27,6 @@ void update_location_using_timezone_offset(double latitude, double longitude, do
 void update_location_using_timezone_id(double latitude, double longitude, const char *timezone_id, gboolean dst);
 
 int update_timezone(const char *timezone_id);
+void update_method(int method);
 
 #endif

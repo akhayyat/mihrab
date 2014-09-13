@@ -56,6 +56,8 @@
 #define INITIAL_REGION  "Middle East"
 #define INITIAL_COUNTRY "Saudi Arabia"
 #define INITIAL_CITY    "Mecca"
+#define INITIAL_METHOD  6
+/* Umm Al-Qurra, Saudi Arabia */
 
 #define METHODS 11
 
@@ -90,7 +92,7 @@ static double prayer_sun_y[] = {0,                             /* Fajr */
                                 0};                            /* Isha */
 static char *method_names[] = {
     "none",
-    "Egyptian General Authority of Survey",
+    "_Egyptian General Authority of Survey",
     "University of Islamic Sciences, Karachi (Shaf'i)",
     "University of Islamic Sciences, Karachi (Hanafi)",
     "Islamic Society of North America",
@@ -242,6 +244,11 @@ static void init_location(void)
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(known_location_radio), TRUE);
 }
 
+static void init_method(void)
+{
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(method_buttons[INITIAL_METHOD]), TRUE);
+}
+
 void update_prayers_layouts(day_strings *day)
 {
     int i;
@@ -319,6 +326,7 @@ static gboolean location_type_handler(GtkWidget *widget, GdkEvent *event)
 {
     gboolean known;
 
+    // TODO: remove this 'if'
     if ((widget == known_location_radio &&
          gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(known_location_radio)))
         ||
@@ -370,6 +378,18 @@ static gboolean custom_location_change_handler(GtkWidget *widget, GdkEvent *even
         dst = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(yes_dst_radio));
 
         update_location_using_timezone_id(latitude, longitude, timezone_id, dst);
+    }
+}
+
+static gboolean method_button_handler(GtkWidget *widget, gpointer data)
+{
+    int i = GPOINTER_TO_INT(data); /* button index */
+    if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(method_buttons[i])))
+    {
+#if DEBUG
+    g_printf("Changed method to: %s\n", method_names[i]);
+#endif
+        update_method(i);
     }
 }
 
@@ -674,6 +694,7 @@ static GtkWidget *create_method_frame(void)
                     _(method_names[i]));
             }
             gtk_grid_attach(GTK_GRID(grid), method_buttons[i], 1, row++, 1, 1);
+            g_signal_connect(G_OBJECT(method_buttons[i]), "toggled", G_CALLBACK(method_button_handler), GINT_TO_POINTER(i));
         }
     }
 
@@ -726,6 +747,7 @@ void init_gui(int *argc_p, char **argv_p[], day_strings *day)
     gtk_container_add(GTK_CONTAINER(window), notebook);
 
     init_location();
+    init_method();
 
     gtk_widget_show(notebook);
     gtk_widget_show(window);
